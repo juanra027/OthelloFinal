@@ -17,7 +17,7 @@ app.set('port',process.env.PORT || 3000);
 
 
 app.use(express.json());
-app.use(cors({origin: 'http://localhost:4200'}));
+app.use(cors({origin: [process.env.URL,'http://localhost:4200']}));
 
 
 //Routes
