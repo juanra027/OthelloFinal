@@ -1,3 +1,4 @@
+const bodyParser = require('body-parser')
 const express = require('express');
 const app = express();
 var server = require('http').createServer(app);
@@ -17,6 +18,7 @@ app.set('port',process.env.PORT || 3000);
 
 
 app.use(express.json());
+//app.use(bodyParser.json())
 app.use(cors({origin: ['https://web-game-fc8f9.firebaseapp.com','http://localhost:4200']}));
 
 
@@ -30,14 +32,7 @@ server.listen(app.get('port'), () => {
 
 
 //sockets
-var conections=[]
 io.on('connection', function(client) {
-  var conections2 = []
-  conections.push(client)
-  console.log(conections.length+ ' <-lista general')
-  conections2.push(client)
-  console.log(conections2.length+ ' <-lista adentro')
-  
   console.log('conectado')
   
   client.on('disconnect', function() {
@@ -45,45 +40,50 @@ io.on('connection', function(client) {
   });
 
 
-  client.on('createRoom', function(data) {
-    console.log('matrix recibida es--'+data.matrix)
+  client.on('createRoom', async function(data) {
+    //console.log('matrix recibida es--'+data.matrix)
     if(io.sockets.adapter.rooms[data.roomId] === undefined){
       client.join(data.roomId);
       //client.join(data.roomId);
       io.sockets.adapter.rooms[data.roomId].matrix=data.matrix 
-      io.sockets.adapter.rooms[data.roomId].actualPlayer=1
+      io.sockets.adapter.rooms[data.roomId].actualPlayer=data.actualPlayer
       io.sockets.adapter.rooms[data.roomId].roomId=data.roomId
-      io.sockets.adapter.rooms[data.roomId].roomId=data.roomId
-      console.log(io.sockets.adapter.rooms[data.roomId])
-      io.in(data.roomId).emit('didMove',io.sockets.adapter.rooms[data.roomId].matrix)
-      io.in(data.roomId).emit('nextPlayer',io.sockets.adapter.rooms[data.roomId].actualPlayer)
-      io.in(data.roomId).emit('roomId',io.sockets.adapter.rooms[data.roomId].roomId)
+      io.to(client.id).emit('didMove',io.sockets.adapter.rooms[data.roomId].matrix)
+      io.to(client.id).emit('nextPlayer',io.sockets.adapter.rooms[data.roomId].actualPlayer)
+      io.to(client.id).emit('roomId',io.sockets.adapter.rooms[data.roomId].roomId)
       console.log(' Client created and joined the room '+data.roomId+ ' and client id is '+ client.id);
     }
     else
-      console.log("error, sala llena")
+      console.log("error, sala ya existe")
   });
   
   
-  client.on('join', function(data) {
-    if(io.sockets.adapter.rooms[data.roomId] !== undefined &&io.sockets.adapter.rooms[data.roomId].length<2){
+  client.on('joinRoom',async function(data) {
       client.join(data.roomId);
-      io.in(data.roomId).emit('didMove',io.sockets.adapter.rooms[data.roomId].matrix)
+      io.sockets.adapter.rooms[data.roomId].actualPlayer.piece=1
+      //console.log("entro prueba y es: "+io.sockets.adapter.rooms[data.roomId].actualPlayer)
+      io.to(client.id).emit('didMove',io.sockets.adapter.rooms[data.roomId].matrix)
       io.in(data.roomId).emit('nextPlayer',io.sockets.adapter.rooms[data.roomId].actualPlayer)
-      io.in(data.roomId).emit('roomId',io.sockets.adapter.rooms[data.roomId].roomId)
+      io.to(client.id).emit('roomId',io.sockets.adapter.rooms[data.roomId].roomId)
       console.log(' Client joined the room '+data.roomId+ ' and client id is '+ client.id);
+  });
+  client.on('checkJoinRoom',async function(data) {
+    if(io.sockets.adapter.rooms[data.roomId] !== undefined &&io.sockets.adapter.rooms[data.roomId].length<2){
+      io.to(client.id).emit('joinChannel',true)
     }
     else if (io.sockets.adapter.rooms[data.roomId] === undefined){
+      io.to(client.id).emit('joinChannel',null)
       console.log("sala no existe")
     }
     else{
-      console.log(io.sockets.adapter.rooms[data.roomId])
+      io.to(client.id).emit('joinChannel',null)
       console.log("error, sala llena")
     }
   });
   
-  client.on('doMove',function(data){
+  client.on('doMove',async function(data){
     io.sockets.adapter.rooms[data.roomId].matrix = data.matrix
+    io.sockets.adapter.rooms[data.roomId].actualPlayer=data.actualPlayer
     io.in(data.roomId).emit('didMove',io.sockets.adapter.rooms[data.roomId].matrix)
     io.in(data.roomId).emit('nextPlayer',io.sockets.adapter.rooms[data.roomId].actualPlayer)
   });
