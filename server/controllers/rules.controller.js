@@ -96,26 +96,13 @@ rulesCtrl.createMatchPvPL= async (req,res)=>{
         matrix: matrix.toString(),
         player1:req.body.player1,
         player2:req.body.player2,
-        tamanno: req.body.size
+        tamanno: req.body.size,
+        actPlayer: req.body.actPlayer
     }).then(docRef => {
         console.log("Document written with ID: ", docRef.id);
         console.log("You can now also access .this as expected: ", this.foo)
         res.json({id:docRef.id,matrix:matrix})
     })
-    /*
-    let matrix = await methods.crearTablero(req.body.size);
-
-    var docRef = db.collection('PlayervsPlayerLocal/').doc();
-    var setTablero =  docRef.set({
-    finished:false,
-    matrix: matrix.toString(),
-    players: {player1:req.body.player1,player2:req.body.player2},
-    tamanno: req.body.size
-    }).then(docRef => {
-        console.log("Document written with ID: ", docRef.id);
-        console.log("You can now also access .this as expected: ", this.foo)
-        res.json({id:docRef.id,matrix:matrix})
-    })*/
 }
 rulesCtrl.createMatchPvPO= async (req,res)=>{
     let matrix = await methods.crearTablero(req.body.size);
@@ -125,7 +112,8 @@ rulesCtrl.createMatchPvPO= async (req,res)=>{
         matrix: matrix.toString(),
         player1:req.body.player1,
         player2:req.body.player2,
-        tamanno: req.body.size
+        tamanno: req.body.size,
+        actPlayer: req.body.actPlayer
     }).then(docRef => {
         console.log("Document written with ID: ", docRef.id);
         console.log("You can now also access .this as expected: ", this.foo)
@@ -150,4 +138,199 @@ rulesCtrl.joinMatchPvPO= async (req,res)=>{
     res.json("se creo el tablero, mensaje desde servidor")
     //res.json("se creo el tablero, mensaje desde servidor")
 }
+rulesCtrl.getMatch = async (req,res)=>{
+    //let players = {player1:'',player2:''}
+    let match=null;
+    var docRef,getDoc; 
+    
+    function matchOnline (){
+        //console.log("Entro a usersOnline")
+        docRef= db.collection('PlayervsPlayerOnline').doc(req.body.roomId);
+        getDoc = docRef.get()
+        .then(doc => {
+        if (!doc.exists) {
+            matchLocal();
+        } else {
+            //console.log('Document data:', doc.data());
+            match=doc.data()
+            res.json(match);
+        }
+        })
+        .catch(err => {
+        console.log('Error getting document', err);
+        });
+    }
+    function matchLocal(){
+        //console.log("Entro a usersLocal")
+        docRef= db.collection('PlayervsPlayerLocal').doc(req.body.roomId);
+        getDoc = docRef.get()
+        .then(doc => {
+        if (!doc.exists) {
+            matchComputer();
+        } else {
+            //console.log('Document data:', doc.data());
+            match=doc.data()
+            res.json(match);
+        }
+        })
+        .catch(err => {
+        console.log('Error getting document', err);
+        });
+    }
+    function matchComputer(){
+        //console.log("Entro a usersComputer")
+        docRef= db.collection('PlayervsComputer').doc(req.body.roomId);
+        getDoc = docRef.get()
+        .then(doc => {
+        if (!doc.exists) {
+            res.json(match)
+        } else {
+            //console.log('Document data:', doc.data());
+            match=doc.data()
+            res.json(match);
+        }
+        })
+        .catch(err => {
+        console.log('Error getting document', err);
+        });
+    }
+    matchOnline();    
+}
+rulesCtrl.updateMatch = async (req,res)=>{
+    //let players = {player1:'',player2:''}
+    //console.log("empieza updatematch")
+    var docRef,getDoc; 
+    
+    function updateMatchOnline (){
+        console.log("Entro a usersOnline")
+        docRef= db.collection('PlayervsPlayerOnline').doc(req.body.roomId);
+        getDoc = docRef.get()
+        .then(doc => {
+        if (!doc.exists) {
+            updateMatchLocal();
+        } else {
+            //console.log('llego a donde hace el update');
+            var updateSingle = docRef.update({"actPlayer.uid": req.body.actualPlayer.uid,"actPlayer.piece":req.body.actualPlayer.piece,"matrix":req.body.matrix.toString()});
+            res.json("se creo el tablero, mensaje desde servidor")
+        }
+        })
+        .catch(err => {
+        console.log('Error getting document', err);
+        });
+    }
+    function updateMatchLocal(){
+        //console.log("Entro a usersLocal")
+        docRef= db.collection('PlayervsPlayerLocal').doc(req.body.roomId);
+        getDoc = docRef.get()
+        .then(doc => {
+        if (!doc.exists) {
+            updateMatchComputer();
+        } else {
+            //console.log('Document data:', doc.data());
+            var updateSingle = docRef.update({ "actPlayer.uid": req.body.actualPlayer.uid,"actPlayer.piece":req.body.actualPlayer.piece,"matrix":req.body.matrix.toString()});
+            res.json("se creo el tablero, mensaje desde servidor")
+        }
+        })
+        .catch(err => {
+        console.log('Error getting document', err);
+        });
+    }
+    function updateMatchComputer(){
+        //console.log("Entro a usersComputer")
+        docRef= db.collection('PlayervsComputer').doc(req.body.roomId);
+        getDoc = docRef.get()
+        .then(doc => {
+        if (!doc.exists) {
+            res.json(match)
+        } else {
+            //console.log('Document data:', doc.data());
+            var updateSingle = docRef.update({ "actPlayer.uid": req.body.actualPlayer.uid,"actPlayer.piece":req.body.actualPlayer.piece,"matrix":req.body.matrix.toString()});
+            res.json("se creo el tablero, mensaje desde servidor")
+        }
+        })
+        .catch(err => {
+        console.log('Error getting document', err);
+        });
+    }
+    updateMatchOnline();    
+}
+rulesCtrl.surrender = async (req,res)=>{
+    //let players = {player1:'',player2:''}
+    //console.log("empieza updatematch")
+    var docRef,getDoc;
+    
+    function updateMatchOnline (){
+        console.log("Entro a usersOnline")
+        docRef= db.collection('PlayervsPlayerOnline').doc(req.body.roomId);
+        getDoc = docRef.get()
+        .then(doc => {
+        if (!doc.exists) {
+            updateMatchLocal();
+        } else {
+            //console.log('llego a donde hace el update');
+            var updateSingle = docRef.update({"finished":true});
+            res.json("se creo el tablero, mensaje desde servidor")
+        }
+        })
+        .catch(err => {
+        console.log('Error getting document', err);
+        });
+    }
+    function updateMatchLocal(){
+        //console.log("Entro a usersLocal")
+        docRef= db.collection('PlayervsPlayerLocal').doc(req.body.roomId);
+        getDoc = docRef.get()
+        .then(doc => {
+        if (!doc.exists) {
+            updateMatchComputer();
+        } else {
+            //console.log('Document data:', doc.data());
+            var updateSingle = docRef.update({"finished":true});
+            res.json("se creo el tablero, mensaje desde servidor")
+        }
+        })
+        .catch(err => {
+        console.log('Error getting document', err);
+        });
+    }
+    function updateMatchComputer(){
+        //console.log("Entro a usersComputer")
+        docRef= db.collection('PlayervsComputer').doc(req.body.roomId);
+        getDoc = docRef.get()
+        .then(doc => {
+        if (!doc.exists) {
+            res.json(match)
+        } else {
+            //console.log('Document data:', doc.data());
+            var updateSingle = docRef.update({"finished":true});
+            res.json("se creo el tablero, mensaje desde servidor")
+        }
+        })
+        .catch(err => {
+        console.log('Error getting document', err);
+        });
+    }
+    updateMatchOnline();    
+}
+rulesCtrl.getAllOnlineRooms = async (req,res)=>{
+    var rooms=[]
+    var docRef = db.collection('PlayervsPlayerOnline');
+    var getDoc = docRef.get()
+    .then(snapshot => {
+        console.log(snapshot.length)
+      snapshot.forEach(doc => {
+          if(doc.data().actPlayer.piece===0&&doc.data().actPlayer.uid!==req.body.userUid){
+              rooms.push({roomId:doc.id,data:doc.data()})
+          }
+      });
+      res.json({rooms:rooms})
+    })
+    .catch(err => {
+      console.log('Error getting documents', err);
+      res.json({rooms:[0]})
+    });
+
+}
+
+
 module.exports = rulesCtrl;

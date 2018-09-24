@@ -32,9 +32,12 @@ server.listen(app.get('port'), () => {
 
 
 //sockets
+//const adminSocket = io('/admin', { forceNew: true });
+
 io.on('connection', function(client) {
+
   console.log('conectado')
-  
+  //io.to(client.id).emit('matches',io.sockets.adapter.rooms[data.roomId].matrix)
   client.on('disconnect', function() {
     console.log("disconnected")
   });
@@ -57,10 +60,15 @@ io.on('connection', function(client) {
       console.log("error, sala ya existe")
   });
   
-  
+  client.on('leaveRoom',async function(data) {
+    client.leave(data.roomId);
+    //console.log("se fue y ahora quedan: "+io.sockets.adapter.rooms[data.roomId].length)
+    console.log(' Client left the room '+data.roomId+ ' and client id is '+ client.id);
+});
   client.on('joinRoom',async function(data) {
       client.join(data.roomId);
-      io.sockets.adapter.rooms[data.roomId].actualPlayer.piece=1
+      if(io.sockets.adapter.rooms[data.roomId].actualPlayer.piece===0)
+        io.sockets.adapter.rooms[data.roomId].actualPlayer.piece=1
       //console.log("entro prueba y es: "+io.sockets.adapter.rooms[data.roomId].actualPlayer)
       io.to(client.id).emit('didMove',io.sockets.adapter.rooms[data.roomId].matrix)
       io.in(data.roomId).emit('nextPlayer',io.sockets.adapter.rooms[data.roomId].actualPlayer)
@@ -69,14 +77,14 @@ io.on('connection', function(client) {
   });
   client.on('checkJoinRoom',async function(data) {
     if(io.sockets.adapter.rooms[data.roomId] !== undefined &&io.sockets.adapter.rooms[data.roomId].length<2){
-      io.to(client.id).emit('joinChannel',true)
+      io.to(client.id).emit('joinChannel',1)
     }
     else if (io.sockets.adapter.rooms[data.roomId] === undefined){
-      io.to(client.id).emit('joinChannel',null)
+      io.to(client.id).emit('joinChannel',2)
       console.log("sala no existe")
     }
     else{
-      io.to(client.id).emit('joinChannel',null)
+      io.to(client.id).emit('joinChannel',3)
       console.log("error, sala llena")
     }
   });
@@ -86,5 +94,15 @@ io.on('connection', function(client) {
     io.sockets.adapter.rooms[data.roomId].actualPlayer=data.actualPlayer
     io.in(data.roomId).emit('didMove',io.sockets.adapter.rooms[data.roomId].matrix)
     io.in(data.roomId).emit('nextPlayer',io.sockets.adapter.rooms[data.roomId].actualPlayer)
+  });
+
+  client.on('availableMatches',async function(){
+    console.log("pruebaaaa")
+    let list=[]
+    io.sockets.adapter.rooms.forEach(element => {
+      console.log(element);
+      list.push()
+    });
+    io.to(client.id).emit('matches',io.sockets.adapter.rooms[data.roomId].matrix)
   });
 });

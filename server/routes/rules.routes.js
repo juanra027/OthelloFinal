@@ -11,7 +11,11 @@ router.post('/createMatchPvPL',rulesCtrl.createMatchPvPL)//crea matriz
 router.post('/createMatchPvPO',rulesCtrl.createMatchPvPO)//crea matriz
 router.post('/createMatchPvE',rulesCtrl.createMatchPvE)//crea matriz
 router.put('/joinMatchPvPO',rulesCtrl.joinMatchPvPO)//crea matriz
+router.put('/updateMatch/:roomId',rulesCtrl.updateMatch)//crea matriz
 router.put('/getUsers/:id',rulesCtrl.getUsers)//pide
+router.put('/surrender/:id',rulesCtrl.surrender)//pide
+router.put('/getMatch/:id',rulesCtrl.getMatch)//pide
+router.put('/getAllOnlineRooms',rulesCtrl.getAllOnlineRooms)//pide
 //router.post//crea datos
 //router.delete//elimina datos
 
