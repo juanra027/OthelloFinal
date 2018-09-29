@@ -36,7 +36,7 @@ rulesCtrl.getUsers = async (req,res)=>{
     var docRef,getDoc; 
     
     function usersOnline (){
-        console.log("Entro a usersOnline")
+        //console.log("Entro a usersOnline")
         docRef= db.collection('PlayervsPlayerOnline').doc(req.body.roomId);
         getDoc = docRef.get()
         .then(doc => {
@@ -53,7 +53,7 @@ rulesCtrl.getUsers = async (req,res)=>{
         });
     }
     function usersLocal(){
-        console.log("Entro a usersLocal")
+        //console.log("Entro a usersLocal")
         docRef= db.collection('PlayervsPlayerLocal').doc(req.body.roomId);
         getDoc = docRef.get()
         .then(doc => {
@@ -70,7 +70,7 @@ rulesCtrl.getUsers = async (req,res)=>{
         });
     }
     function usersComputer(){
-        console.log("Entro a usersComputer")
+        //console.log("Entro a usersComputer")
         docRef= db.collection('PlayervsComputer').doc(req.body.roomId);
         getDoc = docRef.get()
         .then(doc => {
@@ -202,7 +202,7 @@ rulesCtrl.updateMatch = async (req,res)=>{
     var docRef,getDoc; 
     
     function updateMatchOnline (){
-        console.log("Entro a usersOnline")
+        //console.log("Entro a usersOnline")
         docRef= db.collection('PlayervsPlayerOnline').doc(req.body.roomId);
         getDoc = docRef.get()
         .then(doc => {
@@ -260,7 +260,7 @@ rulesCtrl.surrender = async (req,res)=>{
     var docRef,getDoc;
     
     function updateMatchOnline (){
-        console.log("Entro a usersOnline")
+        //console.log("Entro a usersOnline")
         docRef= db.collection('PlayervsPlayerOnline').doc(req.body.roomId);
         getDoc = docRef.get()
         .then(doc => {
@@ -317,7 +317,7 @@ rulesCtrl.getAllOnlineRooms = async (req,res)=>{
     var docRef = db.collection('PlayervsPlayerOnline');
     var getDoc = docRef.get()
     .then(snapshot => {
-        console.log(snapshot.length)
+        //console.log(snapshot.length)
       snapshot.forEach(doc => {
           if(doc.data().actPlayer.piece===0&&doc.data().actPlayer.uid!==req.body.userUid){
               rooms.push({roomId:doc.id,data:doc.data()})
@@ -327,9 +327,69 @@ rulesCtrl.getAllOnlineRooms = async (req,res)=>{
     })
     .catch(err => {
       console.log('Error getting documents', err);
-      res.json({rooms:[0]})
+      res.json({rooms:[]})
     });
 
+}
+rulesCtrl.getAllPlayingRooms = async (req,res)=>{
+    var rooms=[]
+    var docRef,getDoc;
+    
+    function getPlayingMatchOnline (){
+        docRef= db.collection('PlayervsPlayerOnline')
+        getDoc = docRef.get()
+        .then(snapshot => {
+            //console.log(snapshot.length)
+          snapshot.forEach(doc => {
+            if(doc.data().finished===false&&(doc.data().player1.uid===req.body.userUid||doc.data().player2.uid===req.body.userUid)){
+                rooms.push({roomId:doc.id,data:doc.data()})
+            }
+          });
+          getPlayingMatchLocal()
+        })
+        .catch(err => {
+            getPlayingMatchLocal()
+          console.log('Error getting documents', err);
+        });
+    }
+    function getPlayingMatchLocal(){
+        //console.log("Entro a usersLocal")
+        docRef= db.collection('PlayervsPlayerLocal')
+        getDoc = docRef.get()
+        .then(snapshot => {
+            console.log(snapshot.length)
+          snapshot.forEach(doc => {
+            if(doc.data().finished===false&&(doc.data().player1.uid===req.body.userUid||doc.data().player2.uid===req.body.userUid)){
+                rooms.push({roomId:doc.id,data:doc.data()})
+            }
+          });
+          getPlayingMatchComputer();
+        })
+        .catch(err => {
+            getPlayingMatchComputer();
+          console.log('Error getting documents', err);
+        });
+    }
+    function getPlayingMatchComputer(){
+        //console.log("Entro a usersComputer")
+        docRef= db.collection('PlayervsComputer')
+        getDoc = docRef.get()
+        .then(snapshot => {
+            console.log(snapshot.length)
+          snapshot.forEach(doc => {
+            if(doc.data().finished===false&&(doc.data().player1.uid===req.body.userUid||doc.data().player2.uid===req.body.userUid)){
+                rooms.push({roomId:doc.id,data:doc.data()})
+            }
+          });
+          console.log(rooms)
+          res.json({rooms:rooms})
+        })
+        .catch(err => {
+            res.json({rooms:rooms})
+          console.log('Error getting documents', err);
+        });
+    }
+    getPlayingMatchOnline();
 }
 
 

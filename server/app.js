@@ -75,25 +75,34 @@ io.on('connection', function(client) {
       io.to(client.id).emit('roomId',io.sockets.adapter.rooms[data.roomId].roomId)
       console.log(' Client joined the room '+data.roomId+ ' and client id is '+ client.id);
   });
-  client.on('checkJoinRoom',async function(data) {
+  client.on('checkJoinRoom', function(data, fn) {
+    //console.log("datos recibidos son: "+data.roomId)
     if(io.sockets.adapter.rooms[data.roomId] !== undefined &&io.sockets.adapter.rooms[data.roomId].length<2){
-      io.to(client.id).emit('joinChannel',1)
+      //io.to(client.id).emit('joinChannel',1)
+      fn(1)
     }
     else if (io.sockets.adapter.rooms[data.roomId] === undefined){
-      io.to(client.id).emit('joinChannel',2)
+      //io.to(client.id).emit('joinChannel',2)
+      fn(2)
       console.log("sala no existe")
     }
     else{
-      io.to(client.id).emit('joinChannel',3)
+      //io.to(client.id).emit('joinChannel',3)
+      fn(3)
       console.log("error, sala llena")
     }
   });
   
   client.on('doMove',async function(data){
-    io.sockets.adapter.rooms[data.roomId].matrix = data.matrix
-    io.sockets.adapter.rooms[data.roomId].actualPlayer=data.actualPlayer
-    io.in(data.roomId).emit('didMove',io.sockets.adapter.rooms[data.roomId].matrix)
-    io.in(data.roomId).emit('nextPlayer',io.sockets.adapter.rooms[data.roomId].actualPlayer)
+    //if(io.sockets.adapter.rooms[data.roomId]!== undefined){
+      io.sockets.adapter.rooms[data.roomId].matrix = data.matrix
+      io.sockets.adapter.rooms[data.roomId].actualPlayer=data.actualPlayer
+      io.in(data.roomId).emit('didMove',io.sockets.adapter.rooms[data.roomId].matrix)
+      io.in(data.roomId).emit('nextPlayer',io.sockets.adapter.rooms[data.roomId].actualPlayer)
+    //}
+    //else{
+    //  console.log("intento mover, pero no pudo")
+    //}
   });
 
   client.on('availableMatches',async function(){

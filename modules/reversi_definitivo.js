@@ -27,7 +27,7 @@
                 document.write('<br>');
                 var fila = prompt('Ingresa la fila en la desee jugar: ');
                 var columna = prompt('Ingresa la columna en la desee jugar: ');
-                var game = movimiento(parseInt(fila), parseInt(columna), ficha, tam);
+                var game = movimiento(parseInt(fila), parseInt(columna), ficha, tam);//{matrix:lamatriz,validate:boolean}
             } else {
                 document.write('FICHA: ' + ficha[0] + ' Jugador Automatico');
                 document.write('<br>');
