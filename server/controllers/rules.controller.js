@@ -1,7 +1,7 @@
 const editJsonFile = require("edit-json-file");
 let file = editJsonFile(`${__dirname}/../../Data.json`);
 
-var methods = require('../../modules/reversi_definitivo2')
+var methods = require('../../modules/reversie')
 
 const admin = require('firebase-admin');
 var db = admin.firestore();
@@ -31,8 +31,8 @@ rulesCtrl.getPuntaje = async (req,res)=>{
 rulesCtrl.tryMove = (req,res)=>{
     //console.log("antes del validate move")
     //console.log(req.body.actualPlayer)
-    let object = methods.movimiento(req.body.matrix,req.body.posX,req.body.posY,[req.body.actualPlayer,req.body.computer,req.body.difficulty],req.body.matrix.length)
-    //let object = methods.validateMove(req.body.matrix,req.body.posX,req.body.posY,req.body.actualPlayer,req.body.matrix.length); 
+    //let object = methods.movimiento(req.body.matrix,req.body.posX,req.body.posY,[req.body.actualPlayer,req.body.computer,req.body.difficulty],req.body.matrix.length)
+    let object = methods.validateMove(req.body.matrix,req.body.posX,req.body.posY,req.body.actualPlayer,req.body.matrix.length); 
     //console.log("despues del validate move")
     res.json(object);
 }

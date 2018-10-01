@@ -52,17 +52,11 @@ module.exports = {
     movimiento:function(matrix,fila, columna, ficha, tam) {
         matriz=matrix;
 
-        if (fila > tam || columna > tam) {
-            return {matrix:matriz,validate:false};
-        }
         if (ficha[1] == true) {
             jugada = jugadorAutomatico(ficha[0], tam, ficha[2]);
             if (jugada == true) {
                 //alert('Jugador Automatico ha echo la jugada');
                 return {matrix:matriz,validate:true};;
-            }
-            else{
-                console.log("no sirve el automatico: "+jugada)
             }
         }
 
@@ -562,8 +556,6 @@ module.exports = {
 		*/
         function jugadorAutomatico(ficha, tam, dificultad) {
             var fichaC;
-            var a = 0,
-                b = 0;
             var contJugadaFinal = 0;
             var contJugada = 0;
             var fila = 0,
@@ -580,7 +572,7 @@ module.exports = {
                 for (c = 0; c < tam; c++) {
                     if (matriz[f][c] == 0) {
                         contJugada = defjugadaAutomatica(f, c, ficha, tam - 1);
-                        random = Math.floor(Math.random() * 3) + 1;
+                        random = Math.floor(Math.random() * 2) + 1;
 
                         if (dificultad == 1) {
                             if ((contJugada != 0) ) {
