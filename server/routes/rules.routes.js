@@ -17,6 +17,7 @@ router.put('/surrender/:id',rulesCtrl.surrender)//pide
 router.put('/getMatch/:id',rulesCtrl.getMatch)//pide
 router.put('/getAllOnlineRooms',rulesCtrl.getAllOnlineRooms)//pide
 router.put('/getAllPlayingRooms',rulesCtrl.getAllPlayingRooms)//pide
+router.put('/getPuntaje',rulesCtrl.getPuntaje)//pide
 //router.post//crea datos
 //router.delete//elimina datos
 

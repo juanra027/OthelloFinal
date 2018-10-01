@@ -1,7 +1,7 @@
 const editJsonFile = require("edit-json-file");
 let file = editJsonFile(`${__dirname}/../../Data.json`);
 
-var methods = require('../../modules/reversie')
+var methods = require('../../modules/reversi_definitivo2')
 
 const admin = require('firebase-admin');
 var db = admin.firestore();
@@ -22,13 +22,18 @@ rulesCtrl.playerActual = async (req,res) => {
         res.json("2");
     }
    
+}
+rulesCtrl.getPuntaje = async (req,res)=>{
+    let puntaje = methods.calculaPuntaje(req.body.matrix,req.body.matrix.length)
+    res.json(puntaje)
 } 
 
 rulesCtrl.tryMove = (req,res)=>{
-    console.log("antes del validate move")
-    console.log(req.body.actualPlayer)
-    let object = methods.validateMove(req.body.matrix,req.body.posX,req.body.posY,req.body.actualPlayer,req.body.matrix.length); 
-    console.log("despues del validate move")
+    //console.log("antes del validate move")
+    //console.log(req.body.actualPlayer)
+    let object = methods.movimiento(req.body.matrix,req.body.posX,req.body.posY,[req.body.actualPlayer,req.body.computer,req.body.difficulty],req.body.matrix.length)
+    //let object = methods.validateMove(req.body.matrix,req.body.posX,req.body.posY,req.body.actualPlayer,req.body.matrix.length); 
+    //console.log("despues del validate move")
     res.json(object);
 }
 rulesCtrl.getUsers = async (req,res)=>{
@@ -91,6 +96,7 @@ rulesCtrl.getUsers = async (req,res)=>{
 rulesCtrl.createMatchPvPL= async (req,res)=>{
     let matrix = await methods.crearTablero(req.body.size);
 
+
     db.collection("PlayervsPlayerLocal").add({
         finished:false,
         matrix: matrix.toString(),
@@ -106,7 +112,7 @@ rulesCtrl.createMatchPvPL= async (req,res)=>{
 }
 rulesCtrl.createMatchPvPO= async (req,res)=>{
     let matrix = await methods.crearTablero(req.body.size);
-
+    
     db.collection("PlayervsPlayerOnline").add({
         finished:false,
         matrix: matrix.toString(),
@@ -122,14 +128,21 @@ rulesCtrl.createMatchPvPO= async (req,res)=>{
 }
 rulesCtrl.createMatchPvE= async (req,res)=>{
     let matrix = await methods.crearTablero(req.body.size);
-    var docRef = db.collection('PlayervsComputer/').doc();
-    var setTablero =  docRef.set({
-    finished:false,
-    matrix: matrix.toString(),
-    players: {player1:req.body.player1,player2:'Computer'},
-    tamanno: req.body.size
-    });
-    res.json("se creo el tablero, mensaje desde servidor")
+
+    //methods.movimiento(matrix,0,0,[1,0,null],matrix.length)
+    db.collection("PlayervsComputer").add({
+        finished:false,
+        matrix: matrix.toString(),
+        player1:req.body.player1,
+        player2:req.body.player2,
+        //difficulty:req.body.difficulty,
+        tamanno: req.body.size,
+        actPlayer: req.body.actPlayer
+    }).then(docRef => {
+        console.log("Document written with ID: ", docRef.id);
+        console.log("You can now also access .this as expected: ", this.foo)
+        res.json({id:docRef.id,matrix:matrix})
+    })
 }
 rulesCtrl.joinMatchPvPO= async (req,res)=>{
     var docRef = db.collection('PlayervsPlayerOnline').doc(req.body.roomId.toString());
@@ -357,7 +370,7 @@ rulesCtrl.getAllPlayingRooms = async (req,res)=>{
         docRef= db.collection('PlayervsPlayerLocal')
         getDoc = docRef.get()
         .then(snapshot => {
-            console.log(snapshot.length)
+            //console.log(snapshot.length)
           snapshot.forEach(doc => {
             if(doc.data().finished===false&&(doc.data().player1.uid===req.body.userUid||doc.data().player2.uid===req.body.userUid)){
                 rooms.push({roomId:doc.id,data:doc.data()})
@@ -375,13 +388,13 @@ rulesCtrl.getAllPlayingRooms = async (req,res)=>{
         docRef= db.collection('PlayervsComputer')
         getDoc = docRef.get()
         .then(snapshot => {
-            console.log(snapshot.length)
+            //console.log(snapshot.length)
           snapshot.forEach(doc => {
             if(doc.data().finished===false&&(doc.data().player1.uid===req.body.userUid||doc.data().player2.uid===req.body.userUid)){
                 rooms.push({roomId:doc.id,data:doc.data()})
             }
           });
-          console.log(rooms)
+          //console.log(rooms)
           res.json({rooms:rooms})
         })
         .catch(err => {

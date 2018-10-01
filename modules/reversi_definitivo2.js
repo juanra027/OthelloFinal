@@ -19,6 +19,30 @@ module.exports = {
         }
         return matriz
     },
+    calculaPuntaje:function(matrix,tam){
+        matriz=matrix
+        //console.log(puntajes([0,0],tam))
+        return puntajes([0,0],tam)
+    },
+    calculaGanador:function(ficha,matrix,tam){
+        matriz=matrix
+        puntajess=this.calculaPuntaje(matriz,tam)
+        ganadorr = ganador(ficha[0],tam);
+        if(ganadorr==true){
+            //el jugador puede seguir jugando 
+        }
+        else{//el jugador se quedó sin movimientos,definir ganador
+            if(puntajess[0]>puntajess[1]){
+                //gana la ficha 1 
+            }
+            else if(puntajess[0]<puntajess[1]){
+                //gana la ficha 2
+            }
+            else{
+                //empate
+            }
+        }
+    },
     /*
     Funcion para cada vez que un jugador desea realizar un movimiento o jugada
     1) Si es un jugador automatico verifica la jugada dependiendo de su dificultad
@@ -37,11 +61,9 @@ module.exports = {
                 //alert('Jugador Automatico ha echo la jugada');
                 return {matrix:matriz,validate:true};;
             }
-            //------juanra-------
             else{
-                return {matrix:matriz,validate:false};
+                console.log("no sirve el automatico: "+jugada)
             }
-            //-------
         }
 
         if (matriz[fila][columna] == 0) {
@@ -50,14 +72,33 @@ module.exports = {
             if (jugada == true) {
                 matriz[fila][columna] = ficha[0];
                 return {matrix:matriz,validate:true};
-            } else {
-                return {matrix:matriz,validate:false};
-            }
-        } else {
-            return {matrix:matriz,validate:false};
+            } 
         }
+        //ganadorr = ganador(ficha[0],tam);
+
+        //puntajess = puntajes([0,0],tam); // devuelve la lista del puntaje ya que en la pos 0= la ficha 1 y la pos 1 = ficha 2
+
+        /* le deje un solo return de false ya que si es false tiene que llegar hasta este ultimo*/
+        return {matrix:matriz,validate:false};
+        
     }
-}		/*
+}
+        function puntajes(puntaje,tam){
+            for (f = 0; f < tam; f++) {
+                for (c = 0; c < tam; c++) {
+                    if (matriz[f][c] == 1) {
+                        puntaje[0]+=1;
+                    } 
+                    else if (matriz[f][c] == 2) {
+                        puntaje[1]+=1;
+                    } 
+                
+                }
+            }
+            return puntaje;
+        }
+
+        /*
 		Definicion de variables y llamada de metodos para el programa
 		Ej: Ficha es una lista con:
 		0) 0 o 1 si esta el jugador automatico activado
@@ -74,6 +115,8 @@ module.exports = {
 		SO S SE
 		en donde el punto es la direccion de la jugada respecto a una fila columna
         */
+       
+
         function movFichaVerifica(fila, columna, ficha, tam) {
             
             var fichaC;
@@ -341,41 +384,13 @@ module.exports = {
                 for (c = 0; c < tam; c++) {
                     if (matriz[f][c] == 0) {
                         mov = defGanador(f, c, ficha, tam - 1);
-                    } else if (matriz[f][c] == 1) {
-                        a++;
-                    } else if (matriz[f][c] == 2) {
-                        b++;
-                    }
+                    } 
                     if (mov == true) {
-                        return 'El jugador con la ficha: ' + ficha + ' aun puede seguir jugando';
+                        return true;
                     }
                 }
             }
-            if (a > b) {
-                return (
-                    'El ganador es el jugador con ficha 1 ' +
-                    '\n' +
-                    'La puntuacion es: ' +
-                    '\n' +
-                    'Ficha 1: ' +
-                    a +
-                    ' Ficha 2: ' +
-                    b
-                );
-            } else if (a < b) {
-                return (
-                    'El ganador es el jugador con ficha 2 ' +
-                    '\n' +
-                    'La puntuacion es: ' +
-                    '\n' +
-                    'Ficha 1: ' +
-                    a +
-                    ' Ficha 2: ' +
-                    b
-                );
-            } else {
-                return 'Empate ' + '\n' + 'La puntuacion es: ' + '\n' + 'Ficha 1: ' + a + ' Ficha 2: ' + b;
-            }
+            return false;
         }
 		/*
 		Metodo que retorna true o false para ver si ya existe un ganador
@@ -568,13 +583,13 @@ module.exports = {
                         random = Math.floor(Math.random() * 3) + 1;
 
                         if (dificultad == 1) {
-                            if ((contJugada != 0) & (contJugada <= contJugadaFinal)) {
+                            if ((contJugada != 0) ) {
                                 if (contJugadaFinal == 0) {
-                                    ontJugadaFinal = contJugada;
+                                    contJugadaFinal = contJugada;
                                     fila = f;
                                     columna = c;
                                 } else {
-                                    if (random == 1) {
+                                    if (random == 1 & (contJugada <= contJugadaFinal)) {
                                         contJugadaFinal = contJugada;
                                         fila = f;
                                         columna = c;
@@ -586,7 +601,7 @@ module.exports = {
                         if (dificultad == 2) {
                             if (contJugada != 0) {
                                 if (contJugadaFinal == 0) {
-                                    ontJugadaFinal = contJugada;
+                                    contJugadaFinal = contJugada;
                                     fila = f;
                                     columna = c;
                                 } else {

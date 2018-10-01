@@ -51,9 +51,11 @@ io.on('connection', function(client) {
       io.sockets.adapter.rooms[data.roomId].matrix=data.matrix 
       io.sockets.adapter.rooms[data.roomId].actualPlayer=data.actualPlayer
       io.sockets.adapter.rooms[data.roomId].roomId=data.roomId
+      io.sockets.adapter.rooms[data.roomId].points=data.points
       io.to(client.id).emit('didMove',io.sockets.adapter.rooms[data.roomId].matrix)
       io.to(client.id).emit('nextPlayer',io.sockets.adapter.rooms[data.roomId].actualPlayer)
       io.to(client.id).emit('roomId',io.sockets.adapter.rooms[data.roomId].roomId)
+      io.to(client.id).emit('points',io.sockets.adapter.rooms[data.roomId].points)
       console.log(' Client created and joined the room '+data.roomId+ ' and client id is '+ client.id);
     }
     else
@@ -73,6 +75,7 @@ io.on('connection', function(client) {
       io.to(client.id).emit('didMove',io.sockets.adapter.rooms[data.roomId].matrix)
       io.in(data.roomId).emit('nextPlayer',io.sockets.adapter.rooms[data.roomId].actualPlayer)
       io.to(client.id).emit('roomId',io.sockets.adapter.rooms[data.roomId].roomId)
+      io.to(client.id).emit('points',io.sockets.adapter.rooms[data.roomId].points)
       console.log(' Client joined the room '+data.roomId+ ' and client id is '+ client.id);
   });
   client.on('checkJoinRoom', function(data, fn) {
@@ -97,8 +100,10 @@ io.on('connection', function(client) {
     //if(io.sockets.adapter.rooms[data.roomId]!== undefined){
       io.sockets.adapter.rooms[data.roomId].matrix = data.matrix
       io.sockets.adapter.rooms[data.roomId].actualPlayer=data.actualPlayer
+      io.sockets.adapter.rooms[data.roomId].points=data.points
       io.in(data.roomId).emit('didMove',io.sockets.adapter.rooms[data.roomId].matrix)
       io.in(data.roomId).emit('nextPlayer',io.sockets.adapter.rooms[data.roomId].actualPlayer)
+      io.in(data.roomId).emit('points',io.sockets.adapter.rooms[data.roomId].points)
     //}
     //else{
     //  console.log("intento mover, pero no pudo")
@@ -106,7 +111,7 @@ io.on('connection', function(client) {
   });
 
   client.on('availableMatches',async function(){
-    console.log("pruebaaaa")
+    //console.log("pruebaaaa")
     let list=[]
     io.sockets.adapter.rooms.forEach(element => {
       console.log(element);
